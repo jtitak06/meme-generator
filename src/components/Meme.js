@@ -1,22 +1,76 @@
+import { React, useEffect, useState } from 'react';
 import "../styles.css";
-import Frame from "./images/frame.png";
 
 function Meme() {
+  const [meme, setMeme] = useState({
+    topText: "",
+    bottomText: "",
+    randomImage: "http://i.imgflip.com/1bij.jpg"
+  });
+
+  const [allMemes, setAllMemes] = useState([]);
+
+  useEffect(() => {
+      fetch("https://api.imgflip.com/get_memes")
+        .then(res => res.json())
+        .then(data => setAllMemes(data.data.memes))
+    
+}, [])
+
+  function getMemeImage() {
+    const randomNumber = Math.floor(Math.random() * allMemes.length)
+    const url = allMemes[randomNumber].url
+    setMeme(prevMeme => ({
+        ...prevMeme,
+        randomImage: url
+    }))
+};
+
+console.log(allMemes);
+
+function handleChange(event) {
+  const {name, value} = event.target
+  setMeme(prevMeme => ({
+      ...prevMeme,
+      [name]: value
+  }))
+};
+
   return (
-    <form className="meme__form">
-      <div className="meme__input-wrapper">
-        <input className="meme__input_top" placeholder="Shut up" />
-        <input className="meme__input_bottom" placeholder="and take my money" />
+    <main>
+      <form className="form">
+        <div className="form__input-wrapper">
+          <input 
+            type="text"
+            placeholder="Top text"
+            className="form__input"
+            name="topText"
+            value={meme.topText}
+            onChange={handleChange}
+              />
+          <input 
+            type="text"
+            placeholder="Bottom text"
+            className="form__input"
+            name="bottomText"
+            value={meme.bottomText}
+            onChange={handleChange}
+              />
+        </div>
+        <button 
+            className="form__button"
+            type="button"
+            onClick={getMemeImage}
+        >
+            Get a new meme image 🖼
+        </button>
+      </form>
+      <div className="meme">
+        <img src={meme.randomImage} className="meme__image" alt="meme" />
+        <h2 className="meme__text top">{meme.topText}</h2>
+        <h2 className="meme__text bottom">{meme.bottomText}</h2>
       </div>
-      <button className="meme__button" type="submit">
-        <p className="meme__text">
-          Get a new meme image{" "}
-          <span>
-            <img className="meme__frame" src={Frame} alt="frame" />
-          </span>
-        </p>
-      </button>
-    </form>
+    </main>
   );
 }
 
